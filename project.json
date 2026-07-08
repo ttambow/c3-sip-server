@@ -1,0 +1,16 @@
+{
+  "langrev": "1",
+  "warnings": [ "no-unused" ],
+  "dependency-search-paths": [ "lib" ],
+  "dependencies": [ ],
+  "authors": [ "Thomas Blakely <thomas@flutes.nz>" ],
+  "version": "0.1.0",
+  "sources": [ "src/**" ],
+  "test-sources": [ "test/**" ],
+  "output": "build",
+  "targets": {
+    "c3-sip-server": {
+      "type": "executable"
+    }
+  },
+}
