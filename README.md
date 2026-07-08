@@ -15,4 +15,5 @@ More to come.
 * [RFC 3261 - SIP: Session Initiation Protocol](https://datatracker.ietf.org/doc/html/rfc3261)
 * [OpenSIPS - Tools](https://www.opensips.org/Documentation/Tools)
 * [Huntress - SIP Proxy](https://www.huntress.com/cybersecurity-101/topic/sip-proxy)
-* 
+* [Cisco CallManager System Guide - Understanding Session Initiation Protocol](https://www.cisco.com/en/US/docs/voice_ip_comm/cucm/admin/4_0_1/ccmsys/a08sip.html)
+
