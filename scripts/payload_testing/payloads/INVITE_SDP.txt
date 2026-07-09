@@ -1,0 +1,17 @@
+INVITE sip:bob@127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-invite-sdp
+From: <sip:alice@127.0.0.1>;tag=alice-sdp-tag
+To: <sip:bob@127.0.0.1>
+Call-ID: call-sdp-001@127.0.0.1
+CSeq: 1 INVITE
+Contact: <sip:alice@127.0.0.1:5061>
+Content-Type: application/sdp
+Content-Length: 149
+
+v=0
+o=alice 2890844526 2890844526 IN IP4 127.0.0.1
+s=-
+c=IN IP4 127.0.0.1
+t=0 0
+m=audio 49170 RTP/AVP 0
+a=rtpmap:0 PCMU/8000

@@ -1,0 +1,18 @@
+NOTIFY sip:bob@127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-notify-001
+From: <sip:alice@127.0.0.1>;tag=alice-notify-tag
+To: <sip:bob@127.0.0.1>
+Call-ID: call-notify-001@127.0.0.1
+CSeq: 1 NOTIFY
+Contact: <sip:alice@127.0.0.1:5061>
+Event: presence
+Subscription-State: active
+Content-Type: application/pidf+xml
+Content-Length: 83
+
+<?xml version="1.0" encoding="UTF-8"?>
+<presence xmlns="urn:ietf:params:xml:ns:pidf">
+  <tuple id="t1">
+    <status><basic>open</basic></status>
+  </tuple>
+</presence>

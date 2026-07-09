@@ -1,0 +1,11 @@
+MESSAGE sip:bob@127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-msg-001
+From: <sip:alice@127.0.0.1>;tag=alice-msg-tag
+To: <sip:bob@127.0.0.1>
+Call-ID: call-msg-001@127.0.0.1
+CSeq: 1 MESSAGE
+Contact: <sip:alice@127.0.0.1:5061>
+Content-Type: text/plain
+Content-Length: 12
+
+Hello, Bob!

@@ -1,0 +1,173 @@
+name: c3-sip-server.c3-sip-server.workflow.yml
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  C3_VERSION: '0.6.5'  # Update to your preferred version
+  DEPLOY_HOST: 'thomas@flutes.nz'
+  DEPORT_PORT: '50022'
+  DEPLOY_PATH: '/opt/c3-sip-server'
+  TEMP_DEPLOY_PATH: '/tmp/c3-sip-server'
+  BUILD_DIR: 'build'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install C3 compiler
+        run: |
+          wget -q https://github.com/c3lang/c3c/releases/download/v${{ env.C3_VERSION }}/c3-linux-x86_64.tar.gz
+          tar -xzf c3-linux-x86_64.tar.gz
+          sudo mv c3c /usr/local/bin/
+          c3c --version
+
+      - name: Build the SIP server
+        run: |
+          c3c build --release
+
+      - name: Verify build artifacts
+        run: |
+          ls -la ${{ env.BUILD_DIR }}/
+          file ${{ env.BUILD_DIR }}/c3-sip-server
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: c3-sip-server
+          path: |
+            ${{ env.BUILD_DIR }}/c3-sip-server
+            ${{ env.BUILD_DIR }}/**/*.so  # If you have dynamic libraries
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    permissions:
+      contents: read
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: c3-sip-server
+          path: ${{ env.BUILD_DIR }}
+
+      - name: Make binary executable
+        run: chmod +x ${{ env.BUILD_DIR }}/c3-sip-server
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Create configuration files
+        run: |
+          # Create .env file for environment variables if needed
+          cat <<EOF > .env
+          SIP_DOMAIN=${{ secrets.SIP_DOMAIN }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          API_KEY=${{ secrets.API_KEY }}
+          EOF
+
+      - name: Create systemd service file
+        run: |
+          cat <<EOF > c3-sip-server.service
+          [Unit]
+          Description=C3 SIP Server
+          After=network.target
+          Wants=network.target
+          
+          [Service]
+          Type=simple
+          User=www-data
+          Group=www-data
+          WorkingDirectory=${{ env.DEPLOY_PATH }}
+          ExecStart=${{ env.DEPLOY_PATH }}/c3-sip-server
+          Restart=always
+          RestartSec=5
+          StandardOutput=journal
+          StandardError=journal
+          
+          # Security hardening
+          ProtectSystem=full
+          ProtectHome=true
+          PrivateTmp=true
+          NoNewPrivileges=true
+          
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+      - name: Deploy to server
+        run: |
+          # Create temporary directory on server
+          ssh -i ~/.ssh/deploy_key -p ${{ env.DEPORT_PORT }} ${{ env.DEPLOY_HOST }} \
+            "mkdir -p ${{ env.TEMP_DEPLOY_PATH }}"
+          
+          # Copy binary and files
+          scp -i ~/.ssh/deploy_key -P ${{ env.DEPORT_PORT }} \
+            ${{ env.BUILD_DIR }}/c3-sip-server \
+            ${{ env.DEPLOY_HOST }}:${{ env.TEMP_DEPLOY_PATH }}/
+          
+          scp -i ~/.ssh/deploy_key -P ${{ env.DEPORT_PORT }} \
+            .env c3-sip-server.service \
+            ${{ env.DEPLOY_HOST }}:${{ env.TEMP_DEPLOY_PATH }}/
+
+      - name: Install and restart service
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ env.DEPORT_PORT }} ${{ env.DEPLOY_HOST }} bash -s << 'ENDSSH'
+            # Stop the service if running
+            if systemctl is-active --quiet c3-sip-server; then
+              sudo systemctl stop c3-sip-server
+            fi
+          
+            # Deploy files
+            sudo mkdir -p ${{ env.DEPLOY_PATH }}
+            sudo rsync -av --delete ${{ env.TEMP_DEPLOY_PATH }}/ ${{ env.DEPLOY_PATH }}/
+          
+            # Set permissions
+            sudo chmod 755 ${{ env.DEPLOY_PATH }}/c3-sip-server
+            sudo chown -R www-data:www-data ${{ env.DEPLOY_PATH }}
+          
+            # Install systemd service
+            sudo mv ${{ env.DEPLOY_PATH }}/c3-sip-server.service /etc/systemd/system/
+            sudo systemctl daemon-reload
+          
+            # Enable and start the service
+            sudo systemctl enable c3-sip-server
+            sudo systemctl start c3-sip-server
+          
+            # Check status
+            sudo systemctl status c3-sip-server --no-pager
+          
+            # Cleanup temporary directory
+            sudo rm -rf ${{ env.TEMP_DEPLOY_PATH }}
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ env.DEPORT_PORT }} ${{ env.DEPLOY_HOST }} \
+            "systemctl is-active --quiet c3-sip-server && echo 'Service is running' || echo 'Service failed to start'"
+
+      - name: Cleanup SSH keys and temp files
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key ~/.ssh/known_hosts
+          rm -f .env c3-sip-server.service

@@ -1,0 +1,17 @@
+PUBLISH sip:127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-pub-001
+From: <sip:alice@127.0.0.1>;tag=alice-pub-tag
+To: <sip:alice@127.0.0.1>
+Call-ID: call-pub-001@127.0.0.1
+CSeq: 1 PUBLISH
+Contact: <sip:alice@127.0.0.1:5061>
+Event: presence
+Content-Type: application/pidf+xml
+Content-Length: 83
+
+<?xml version="1.0" encoding="UTF-8"?>
+<presence xmlns="urn:ietf:params:xml:ns:pidf">
+  <tuple id="t1">
+    <status><basic>open</basic></status>
+  </tuple>
+</presence>

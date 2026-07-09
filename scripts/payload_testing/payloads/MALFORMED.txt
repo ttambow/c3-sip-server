@@ -1,0 +1,4 @@
+INVITE sip:bob@127.0.0.1 SIP/2.0
+Call-ID: bad-call@127.0.0.1
+Content-Length: 0
+

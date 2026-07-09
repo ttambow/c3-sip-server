@@ -1,0 +1,11 @@
+SUBSCRIBE sip:bob@127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-sub-001
+From: <sip:alice@127.0.0.1>;tag=alice-sub-tag
+To: <sip:bob@127.0.0.1>
+Call-ID: call-sub-001@127.0.0.1
+CSeq: 1 SUBSCRIBE
+Contact: <sip:alice@127.0.0.1:5061>
+Event: presence
+Expires: 7200
+Content-Length: 0
+

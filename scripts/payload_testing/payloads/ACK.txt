@@ -1,0 +1,9 @@
+ACK sip:bob@127.0.0.1 SIP/2.0
+Via: SIP/2.0/TCP 127.0.0.1:5061;branch=z9hG4bK-ack-001
+From: <sip:alice@127.0.0.1>;tag=alice-tag-001
+To: <sip:bob@127.0.0.1>;tag=server-tag-001
+Call-ID: call-001@127.0.0.1
+CSeq: 1 ACK
+Contact: <sip:alice@127.0.0.1:5061>
+Content-Length: 0
+
