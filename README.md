@@ -16,4 +16,5 @@ More to come.
 * [OpenSIPS - Tools](https://www.opensips.org/Documentation/Tools)
 * [Huntress - SIP Proxy](https://www.huntress.com/cybersecurity-101/topic/sip-proxy)
 * [Cisco CallManager System Guide - Understanding Session Initiation Protocol](https://www.cisco.com/en/US/docs/voice_ip_comm/cucm/admin/4_0_1/ccmsys/a08sip.html)
+* [C3hat @ Avey](https://git.avey.dev/tutorials/C3hat/)
 
