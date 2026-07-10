@@ -9,8 +9,7 @@ SERVER="${2:-127.0.0.1}"
 function usage()
 {
   echo "Usage: $0 <method> [server] [port]"
-  echo ""
-  echo "Available methods:"
+  echo -e "\nAvailable methods:"
 
   for f in "$PAYLOAD_DIR"/*.txt; do
     name="$(basename "$f" .txt)"

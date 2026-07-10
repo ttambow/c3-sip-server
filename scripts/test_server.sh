@@ -14,7 +14,7 @@ function build()
 
 function check()
 {
-  if ! pgrep -f "$SERVER_BIN" > /dev/null 2>&1; then
+  if [ ! pgrep -f "$SERVER_BIN" > /dev/null 2>&1 ]; then
     echo "Error! The C3 SIP Server is not running!"
 
     return 1
@@ -78,7 +78,7 @@ function main()
 
 function run()
 {
-  if pgrep -f "$SERVER_BIN" > /dev/null 2>&1; then
+  if [ pgrep -f "$SERVER_BIN" > /dev/null 2>&1 ]; then
     echo "Server already running"
 
     SERVER_PID=$(pgrep -f "$SERVER_BIN")
@@ -90,9 +90,11 @@ function run()
 
   SERVER_PID=$!
 
+  echo "Server PID: $SERVER_PID"
+
   sleep 1
 
-  if kill -0 "$SERVER_PID" 2>/dev/null; then
+  if [ $(pgrep -f "$SERVER_BIN") == "$SERVER_PID" ]; then
     echo "Server started (PID: $SERVER_PID)"
   else
     echo "Error! Server failed to start"
@@ -116,8 +118,7 @@ function send_request()
 
 function stop()
 {
-  if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
-    kill "$SERVER_PID" 2>/dev/null || true
+  if [ kill "$SERVER_PID" 2>/dev/null ]; then
     wait "$SERVER_PID" 2>/dev/null || true
 
     echo "Server stopped"
